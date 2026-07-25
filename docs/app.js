@@ -127,14 +127,25 @@
     els.btnTheme.addEventListener('click', cycleTheme);
   }
 
+  let tocObserver = null;
+
   function buildToc() {
+    tocObserver = new IntersectionObserver((entries) => {
+      entries.forEach((obs) => {
+        if (!obs.isIntersecting) return;
+        const img = obs.target;
+        img.src = img.dataset.src;
+        img.removeAttribute('data-src');
+        tocObserver.unobserve(img);
+      });
+    }, { root: els.tocGrid, rootMargin: '300px 0px' });
+
     const frag = document.createDocumentFragment();
     state.manifest.pages.forEach((entry) => {
       const item = document.createElement('div');
       item.className = 'toc-item';
       const img = document.createElement('img');
-      img.src = entry.file;
-      img.loading = 'lazy';
+      img.dataset.src = entry.file;
       img.alt = `Pagina ${entry.page}`;
       const label = document.createElement('span');
       label.textContent = `Pag. ${entry.page}`;
@@ -145,6 +156,7 @@
         els.tocPanel.classList.add('hidden');
       });
       frag.appendChild(item);
+      tocObserver.observe(img);
     });
     els.tocGrid.appendChild(frag);
   }
@@ -163,14 +175,14 @@
     els.btnGo.addEventListener('click', jump);
     els.pageInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') jump(); });
 
+    let tocBuilt = false;
     els.btnToc.addEventListener('click', () => {
+      if (!tocBuilt) { buildToc(); tocBuilt = true; }
       els.tocPanel.classList.remove('hidden');
     });
     els.btnCloseToc.addEventListener('click', () => {
       els.tocPanel.classList.add('hidden');
     });
-
-    buildToc();
   }
 
   function bindNavigation() {

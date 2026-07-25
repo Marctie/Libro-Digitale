@@ -203,7 +203,14 @@ html, body {
   font-size: 11px;
 }
 .toc-item:hover { border-color: var(--accent); transform: translateY(-2px); }
-.toc-item img { width: 100%; display: block; aspect-ratio: 3/4; object-fit: cover; }
+.toc-item img {
+  width: 100%; display: block; aspect-ratio: 3/4; object-fit: cover;
+  background: linear-gradient(115deg, rgba(128,128,128,0.08) 8%, rgba(128,128,128,0.18) 18%, rgba(128,128,128,0.08) 33%);
+  background-size: 200% 100%;
+  animation: shimmer 1.4s ease infinite;
+}
+.toc-item img[src] { animation: none; background: none; }
+@keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
 .toc-item span { display: block; padding: 4px 0; opacity: .75; }
 
 ::-webkit-scrollbar { width: 10px; height: 10px; }
