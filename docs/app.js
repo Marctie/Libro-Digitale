@@ -29,6 +29,9 @@
     tocGrid: document.getElementById('tocGrid'),
   };
 
+  const PROGRESS_KEY = 'libro-progress';
+  let saveTimer = null;
+
   const THEMES = ['light', 'dark', 'sepia'];
   const THEME_ICONS = { light: '🌙', dark: '☀️', sepia: '📜' };
 
@@ -55,6 +58,7 @@
       applyZoom();
       els.pageSlider.value = num;
       els.pageInput.value = num;
+      saveProgress(num);
     };
 
     if (instant) {
@@ -196,6 +200,41 @@
     }, { passive: true });
   }
 
+  function saveProgress(num) {
+    clearTimeout(saveTimer);
+    saveTimer = setTimeout(() => {
+      localStorage.setItem(PROGRESS_KEY, JSON.stringify({ page: num, ts: Date.now() }));
+    }, 250);
+  }
+
+  function loadProgress() {
+    try {
+      const raw = localStorage.getItem(PROGRESS_KEY);
+      if (!raw) return null;
+      return JSON.parse(raw);
+    } catch {
+      return null;
+    }
+  }
+
+  function showResumeToast(page) {
+    const toast = document.createElement('div');
+    toast.textContent = `Hai ripreso da pagina ${page} — riprendo da dove avevi lasciato`;
+    Object.assign(toast.style, {
+      position: 'fixed', bottom: '84px', left: '50%', transform: 'translateX(-50%)',
+      background: 'var(--accent)', color: '#fff', padding: '10px 18px',
+      borderRadius: '20px', fontSize: '13px', fontFamily: 'sans-serif',
+      boxShadow: '0 6px 18px rgba(0,0,0,0.3)', zIndex: 50, opacity: '0',
+      transition: 'opacity 300ms',
+    });
+    document.body.appendChild(toast);
+    requestAnimationFrame(() => { toast.style.opacity = '1'; });
+    setTimeout(() => {
+      toast.style.opacity = '0';
+      setTimeout(() => toast.remove(), 300);
+    }, 2600);
+  }
+
   async function init() {
     try {
       const res = await fetch('manifest.json', { cache: 'no-cache' });
@@ -210,12 +249,19 @@
     bindZoomAndFullscreen();
     bindTheme();
     bindTocAndJump();
-    renderPage(1, { instant: true });
+
+    const saved = loadProgress();
+    const startPage = saved && saved.page >= 1 && saved.page <= totalPages() ? saved.page : 1;
+    renderPage(startPage, { instant: true });
 
     els.loading.style.opacity = '0';
     setTimeout(() => { els.loading.style.display = 'none'; }, 300);
     els.topbar.classList.remove('hidden');
     els.bottombar.classList.remove('hidden');
+
+    if (saved && startPage > 1) {
+      setTimeout(() => showResumeToast(startPage), 500);
+    }
   }
 
   init();
