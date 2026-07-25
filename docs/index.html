@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Libro Digitale</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📖</text></svg>">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div id="loading" class="loading">
+  <div class="spinner"></div>
+  <p>Apertura del libro…</p>
+</div>
+
+<header id="topbar" class="topbar hidden">
+  <button id="btnToc" class="icon-btn" title="Indice / Miniature">☰</button>
+  <div class="title-block">
+    <span id="bookTitle">Libro Digitale</span>
+    <span id="pageMeta" class="page-meta"></span>
+  </div>
+  <div class="top-actions">
+    <button id="btnTheme" class="icon-btn" title="Tema">🌙</button>
+    <button id="btnZoomOut" class="icon-btn" title="Riduci">−</button>
+    <button id="btnZoomIn" class="icon-btn" title="Ingrandisci">+</button>
+    <button id="btnFullscreen" class="icon-btn" title="Schermo intero">⛶</button>
+  </div>
+</header>
+
+<main id="reader" class="reader">
+  <button id="prevBtn" class="nav-zone nav-left" aria-label="Pagina precedente"><span>‹</span></button>
+  <div id="pageStage" class="page-stage">
+    <img id="pageImg" class="page-img" alt="Pagina" draggable="false">
+  </div>
+  <button id="nextBtn" class="nav-zone nav-right" aria-label="Pagina successiva"><span>›</span></button>
+</main>
+
+<footer id="bottombar" class="bottombar hidden">
+  <input id="pageSlider" type="range" min="1" value="1" step="1">
+  <div class="page-jump">
+    <input id="pageInput" type="number" min="1" inputmode="numeric" aria-label="Vai a pagina">
+    <button id="btnGo">Vai</button>
+  </div>
+</footer>
+
+<div id="tocPanel" class="toc-panel hidden">
+  <div class="toc-header">
+    <h2>Indice pagine</h2>
+    <button id="btnCloseToc" class="icon-btn">✕</button>
+  </div>
+  <div id="tocGrid" class="toc-grid"></div>
+</div>
+
+<script src="app.js"></script>
+</body>
+</html>
