@@ -19,7 +19,11 @@
     btnZoomIn: document.getElementById('btnZoomIn'),
     btnZoomOut: document.getElementById('btnZoomOut'),
     btnFullscreen: document.getElementById('btnFullscreen'),
+    btnTheme: document.getElementById('btnTheme'),
   };
+
+  const THEMES = ['light', 'dark', 'sepia'];
+  const THEME_ICONS = { light: '🌙', dark: '☀️', sepia: '📜' };
 
   const ZOOM_MIN = 0.5;
   const ZOOM_MAX = 3;
@@ -92,6 +96,24 @@
     els.btnFullscreen.addEventListener('click', toggleFullscreen);
   }
 
+  function applyTheme(theme) {
+    document.documentElement.setAttribute('data-theme', theme);
+    els.btnTheme.textContent = THEME_ICONS[theme];
+    localStorage.setItem('libro-theme', theme);
+  }
+
+  function cycleTheme() {
+    const current = document.documentElement.getAttribute('data-theme') || 'light';
+    const idx = THEMES.indexOf(current);
+    applyTheme(THEMES[(idx + 1) % THEMES.length]);
+  }
+
+  function bindTheme() {
+    const saved = localStorage.getItem('libro-theme') || 'light';
+    applyTheme(saved);
+    els.btnTheme.addEventListener('click', cycleTheme);
+  }
+
   function bindNavigation() {
     els.prevBtn.addEventListener('click', prev);
     els.nextBtn.addEventListener('click', next);
@@ -131,6 +153,7 @@
 
     bindNavigation();
     bindZoomAndFullscreen();
+    bindTheme();
     renderPage(1, { instant: true });
 
     els.loading.style.opacity = '0';
