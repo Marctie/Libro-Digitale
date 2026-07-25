@@ -16,7 +16,14 @@
     prevBtn: document.getElementById('prevBtn'),
     nextBtn: document.getElementById('nextBtn'),
     reader: document.getElementById('reader'),
+    btnZoomIn: document.getElementById('btnZoomIn'),
+    btnZoomOut: document.getElementById('btnZoomOut'),
+    btnFullscreen: document.getElementById('btnFullscreen'),
   };
+
+  const ZOOM_MIN = 0.5;
+  const ZOOM_MAX = 3;
+  const ZOOM_STEP = 0.15;
 
   function totalPages() {
     return state.manifest ? state.manifest.total : 0;
@@ -33,6 +40,8 @@
       els.pageImg.src = entry.file;
       els.pageMeta.textContent = `Pagina ${num} / ${total} · ${entry.date} ${entry.time}`;
       els.pageImg.classList.remove('turning');
+      state.zoom = 1;
+      applyZoom();
     };
 
     if (instant) {
@@ -53,6 +62,34 @@
   function toggleBars() {
     els.topbar.classList.toggle('hidden');
     els.bottombar.classList.toggle('hidden');
+  }
+
+  function applyZoom() {
+    els.pageImg.style.transform = `scale(${state.zoom})`;
+  }
+
+  function zoomIn() {
+    state.zoom = Math.min(ZOOM_MAX, state.zoom + ZOOM_STEP);
+    applyZoom();
+  }
+
+  function zoomOut() {
+    state.zoom = Math.max(ZOOM_MIN, state.zoom - ZOOM_STEP);
+    applyZoom();
+  }
+
+  function toggleFullscreen() {
+    if (!document.fullscreenElement) {
+      document.documentElement.requestFullscreen?.();
+    } else {
+      document.exitFullscreen?.();
+    }
+  }
+
+  function bindZoomAndFullscreen() {
+    els.btnZoomIn.addEventListener('click', zoomIn);
+    els.btnZoomOut.addEventListener('click', zoomOut);
+    els.btnFullscreen.addEventListener('click', toggleFullscreen);
   }
 
   function bindNavigation() {
@@ -93,6 +130,7 @@
     }
 
     bindNavigation();
+    bindZoomAndFullscreen();
     renderPage(1, { instant: true });
 
     els.loading.style.opacity = '0';
