@@ -20,6 +20,13 @@
     btnZoomOut: document.getElementById('btnZoomOut'),
     btnFullscreen: document.getElementById('btnFullscreen'),
     btnTheme: document.getElementById('btnTheme'),
+    pageSlider: document.getElementById('pageSlider'),
+    pageInput: document.getElementById('pageInput'),
+    btnGo: document.getElementById('btnGo'),
+    btnToc: document.getElementById('btnToc'),
+    btnCloseToc: document.getElementById('btnCloseToc'),
+    tocPanel: document.getElementById('tocPanel'),
+    tocGrid: document.getElementById('tocGrid'),
   };
 
   const THEMES = ['light', 'dark', 'sepia'];
@@ -46,6 +53,8 @@
       els.pageImg.classList.remove('turning');
       state.zoom = 1;
       applyZoom();
+      els.pageSlider.value = num;
+      els.pageInput.value = num;
     };
 
     if (instant) {
@@ -114,6 +123,52 @@
     els.btnTheme.addEventListener('click', cycleTheme);
   }
 
+  function buildToc() {
+    const frag = document.createDocumentFragment();
+    state.manifest.pages.forEach((entry) => {
+      const item = document.createElement('div');
+      item.className = 'toc-item';
+      const img = document.createElement('img');
+      img.src = entry.file;
+      img.loading = 'lazy';
+      img.alt = `Pagina ${entry.page}`;
+      const label = document.createElement('span');
+      label.textContent = `Pag. ${entry.page}`;
+      item.appendChild(img);
+      item.appendChild(label);
+      item.addEventListener('click', () => {
+        goTo(entry.page);
+        els.tocPanel.classList.add('hidden');
+      });
+      frag.appendChild(item);
+    });
+    els.tocGrid.appendChild(frag);
+  }
+
+  function bindTocAndJump() {
+    const total = totalPages();
+    els.pageSlider.max = total;
+    els.pageInput.max = total;
+
+    els.pageSlider.addEventListener('input', () => goTo(Number(els.pageSlider.value)));
+
+    const jump = () => {
+      const n = parseInt(els.pageInput.value, 10);
+      if (!isNaN(n)) goTo(n);
+    };
+    els.btnGo.addEventListener('click', jump);
+    els.pageInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') jump(); });
+
+    els.btnToc.addEventListener('click', () => {
+      els.tocPanel.classList.remove('hidden');
+    });
+    els.btnCloseToc.addEventListener('click', () => {
+      els.tocPanel.classList.add('hidden');
+    });
+
+    buildToc();
+  }
+
   function bindNavigation() {
     els.prevBtn.addEventListener('click', prev);
     els.nextBtn.addEventListener('click', next);
@@ -121,7 +176,7 @@
     window.addEventListener('keydown', (e) => {
       if (e.key === 'ArrowRight' || e.key === ' ') next();
       else if (e.key === 'ArrowLeft') prev();
-      else if (e.key === 'Escape') { /* handled by other modules */ }
+      else if (e.key === 'Escape') els.tocPanel.classList.add('hidden');
     });
 
     els.pageImg.addEventListener('click', toggleBars);
@@ -154,6 +209,7 @@
     bindNavigation();
     bindZoomAndFullscreen();
     bindTheme();
+    bindTocAndJump();
     renderPage(1, { instant: true });
 
     els.loading.style.opacity = '0';
