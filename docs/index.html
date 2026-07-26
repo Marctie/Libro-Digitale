@@ -21,6 +21,7 @@
     <span id="pageMeta" class="page-meta"></span>
   </div>
   <div class="top-actions">
+    <button id="btnSearch" class="icon-btn" title="Cerca nel testo">🔍</button>
     <button id="btnTheme" class="icon-btn" title="Tema">🌙</button>
     <button id="btnZoomOut" class="icon-btn" title="Riduci">−</button>
     <button id="btnZoomIn" class="icon-btn" title="Ingrandisci">+</button>
@@ -50,6 +51,14 @@
     <button id="btnCloseToc" class="icon-btn">✕</button>
   </div>
   <div id="tocGrid" class="toc-grid"></div>
+</div>
+
+<div id="searchPanel" class="search-panel hidden">
+  <div class="search-header">
+    <input id="searchInput" type="search" placeholder="Cerca nel testo delle pagine…" autocomplete="off">
+    <button id="btnCloseSearch" class="icon-btn">✕</button>
+  </div>
+  <div id="searchResults" class="search-results"></div>
 </div>
 
 <script src="app.js"></script>

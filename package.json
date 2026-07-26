@@ -1,0 +1,12 @@
+{
+  "name": "libro-digitale",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Build script per il reader del Libro Digitale (pagine + OCR).",
+  "scripts": {
+    "build": "node build.js"
+  },
+  "dependencies": {
+    "tesseract.js": "^5.1.1"
+  }
+}

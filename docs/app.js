@@ -27,6 +27,11 @@
     btnCloseToc: document.getElementById('btnCloseToc'),
     tocPanel: document.getElementById('tocPanel'),
     tocGrid: document.getElementById('tocGrid'),
+    btnSearch: document.getElementById('btnSearch'),
+    btnCloseSearch: document.getElementById('btnCloseSearch'),
+    searchPanel: document.getElementById('searchPanel'),
+    searchInput: document.getElementById('searchInput'),
+    searchResults: document.getElementById('searchResults'),
   };
 
   const PROGRESS_KEY = 'libro-progress';
@@ -185,6 +190,64 @@
     });
   }
 
+  function escapeHtml(s) {
+    return s.replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  }
+
+  function snippetFor(text, query) {
+    const idx = text.toLowerCase().indexOf(query.toLowerCase());
+    if (idx === -1) return escapeHtml(text.slice(0, 140));
+    const start = Math.max(0, idx - 50);
+    const end = Math.min(text.length, idx + query.length + 90);
+    let snippet = text.slice(start, end);
+    if (start > 0) snippet = '…' + snippet;
+    if (end < text.length) snippet += '…';
+    const re = new RegExp(query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'ig');
+    return escapeHtml(snippet).replace(re, (m) => `<mark>${m}</mark>`);
+  }
+
+  let searchTimer = null;
+
+  function runSearch(query) {
+    query = query.trim();
+    els.searchResults.innerHTML = '';
+    if (!query) {
+      els.searchResults.innerHTML = '<div class="search-empty">Digita per cercare nel testo delle pagine.</div>';
+      return;
+    }
+    const q = query.toLowerCase();
+    const matches = state.manifest.pages.filter((p) => (p.text || '').toLowerCase().includes(q));
+    if (!matches.length) {
+      els.searchResults.innerHTML = '<div class="search-empty">Nessun risultato.</div>';
+      return;
+    }
+    const frag = document.createDocumentFragment();
+    matches.slice(0, 200).forEach((p) => {
+      const item = document.createElement('div');
+      item.className = 'search-result';
+      item.innerHTML = `<div class="sr-page">Pagina ${p.page} · ${p.date}</div><div class="sr-snippet">${snippetFor(p.text, query)}</div>`;
+      item.addEventListener('click', () => {
+        goTo(p.page);
+        els.searchPanel.classList.add('hidden');
+      });
+      frag.appendChild(item);
+    });
+    els.searchResults.appendChild(frag);
+  }
+
+  function bindSearch() {
+    els.btnSearch.addEventListener('click', () => {
+      els.searchPanel.classList.remove('hidden');
+      els.searchInput.focus();
+      if (!els.searchInput.value) runSearch('');
+    });
+    els.btnCloseSearch.addEventListener('click', () => els.searchPanel.classList.add('hidden'));
+    els.searchInput.addEventListener('input', () => {
+      clearTimeout(searchTimer);
+      searchTimer = setTimeout(() => runSearch(els.searchInput.value), 150);
+    });
+  }
+
   function bindNavigation() {
     els.prevBtn.addEventListener('click', prev);
     els.nextBtn.addEventListener('click', next);
@@ -192,7 +255,7 @@
     window.addEventListener('keydown', (e) => {
       if (e.key === 'ArrowRight' || e.key === ' ') next();
       else if (e.key === 'ArrowLeft') prev();
-      else if (e.key === 'Escape') els.tocPanel.classList.add('hidden');
+      else if (e.key === 'Escape') { els.tocPanel.classList.add('hidden'); els.searchPanel.classList.add('hidden'); }
     });
 
     els.pageImg.addEventListener('click', toggleBars);
@@ -261,6 +324,7 @@
     bindZoomAndFullscreen();
     bindTheme();
     bindTocAndJump();
+    bindSearch();
 
     const saved = loadProgress();
     const startPage = saved && saved.page >= 1 && saved.page <= totalPages() ? saved.page : 1;
